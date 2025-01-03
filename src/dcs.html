@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            width: 300px;
+        }
+
+        .eyes-container {
+            position: relative;
+            height: 80px;
+            margin-bottom: 20px;
+        }
+
+        .eye {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid #000;
+            top: 20px;
+        }
+
+        .eye.left {
+            left: 90px;
+        }
+
+        .eye.right {
+            right: 90px;
+        }
+
+        .pupil {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #000;
+            border-radius: 50%;
+            top: 10px;
+            left: 10px;
+            transition: all 0.1s ease;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="eyes-container">
+        <div class="eye left"><div class="pupil"></div></div>
+        <div class="eye right"><div class="pupil"></div></div>
+    </div>
+    <div class="form-group">
+        <input type="text" placeholder="Username" id="username">
+    </div>
+    <div class="form-group">
+        <input type="password" placeholder="Password" id="password">
+    </div>
+    <button>Login</button>
+</div>
+
+<script>
+    const container = document.querySelector('.login-container');
+    const pupils = document.querySelectorAll('.pupil');
+    const inputs = document.querySelectorAll('input');
+
+    function calculateEyeMovement(input) {
+        const inputRect = input.getBoundingClientRect();
+        const inputCenterX = inputRect.left + inputRect.width / 2;
+        const inputCenterY = inputRect.top;
+
+        pupils.forEach(pupil => {
+            const eye = pupil.parentElement;
+            const eyeRect = eye.getBoundingClientRect();
+            const eyeCenterX = eyeRect.left + eyeRect.width / 2;
+            const eyeCenterY = eyeRect.top + eyeRect.height / 2;
+
+            // Tính toán góc giữa mắt và vị trí input
+            const angle = Math.atan2(inputCenterY - eyeCenterY, inputCenterX - eyeCenterX);
+
+            // Giới hạn khoảng di chuyển của đồng tử
+            const distance = 5;
+            const moveX = Math.cos(angle) * distance;
+            const moveY = Math.sin(angle) * distance;
+
+            pupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+    }
+
+    // Theo dõi sự kiện focus vào input
+    inputs.forEach(input => {
+        input.addEventListener('focus', () => calculateEyeMovement(input));
+    });
+
+    // Theo dõi sự kiện click bên ngoài để reset vị trí mắt
+    document.addEventListener('click', (e) => {
+        if (!container.contains(e.target)) {
+            pupils.forEach(pupil => {
+                pupil.style.transform = 'translate(0, 0)';
+            });
+        }
+    });
+
+    // Theo dõi sự kiện nhập liệu để cập nhật vị trí mắt
+    inputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+            const inputRect = input.getBoundingClientRect();
+            const caretPosition = input.selectionStart;
+            const charWidth = 8; // Ước tính độ rộng của mỗi ký tự
+
+            pupils.forEach(pupil => {
+                const eye = pupil.parentElement;
+                const eyeRect = eye.getBoundingClientRect();
+                const eyeCenterX = eyeRect.left + eyeRect.width / 2;
+                const eyeCenterY = eyeRect.top + eyeRect.height / 2;
+
+                const inputX = inputRect.left + (caretPosition * charWidth);
+                const inputY = inputRect.top;
+
+                const angle = Math.atan2(inputY - eyeCenterY, inputX - eyeCenterX);
+                const distance = 5;
+                const moveX = Math.cos(angle) * distance;
+                const moveY = Math.sin(angle) * distance;
+
+                pupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            });
+        });
+    });
+</script>
+</body>
+</html>
